@@ -1,23 +1,46 @@
 (1) 编译.c文件生成内核模块.ko
-(2) 上传.ko文件至N900
-(3) 在N900上运行以下命令查看complete设备所分配的主设备号, e.g. 246
-cat /proc/devices
-(4) 在N900上生成新的设备节点
-mknod /dev/complete c 246 1
-(5) 开启两个ssh至N900
-(6) 第一个ssh(logon N900 already)中cat /dev/complete
-(7) 第二个ssh(logon N900 already)中
-dmesg
-可以看到
-P[  189.713653] trial_completion_register_chrdev: no version for "struct_module" found: kernel tainted.
-[  189.714935] trial_completion_register_chrdev: module license 'unspecified' taints kernel.
-[  376.737915] process -919796568 (????????????????????????) going to sleep
 
-再
-echo 1 > /dev/complete
-则第一个ssh阻塞的cat退出，观察dmesg输出如下：
-[  189.713653] trial_completion_register_chrdev: no version for "struct_module" found: kernel tainted.
-[  189.714935] trial_completion_register_chrdev: module license 'unspecified' taints kernel.
-[  376.737915] process -919796568 (????????????????????????) going to sleep
-[  407.761840] process -940534872 (????????????????????????) awakening the readers...
-[  407.762481] awoken -919796568 (????????????????????????)
+(2) 上传.ko文件至device(N900 or HTC Android phone)
+
+(3) 在device上
+
+    加载模块
+        insmod ompletion-register_chrdev.ko
+
+    运行以下命令查看complete设备所分配的主设备号, e.g. 246 or 234
+        cat /proc/devices
+
+(4) 在device上生成新的设备节点
+        mknod /dev/complete c 246 1
+    or
+        mknod /dev/complete c 234 1
+
+(5) 开启两个ssh至device(N900), or, 开启两个adb shell至device(HTC Android phone)
+
+(6) 第一个ssh/shell中cat /dev/complete
+
+(7) 第二个ssh/shell中
+        N900
+            dmesg
+            可以看到
+            P[  189.713653] trial_completion_register_chrdev: no version for "struct_module" found: kernel tainted.
+            [  189.714935] trial_completion_register_chrdev: module license 'unspecified' taints kernel.
+            [  376.737915] process -919796568 (????????????????????????) going to sleep
+
+            再
+            echo 1 > /dev/complete
+            则第一个ssh阻塞的cat退出，观察dmesg输出如下：
+            [  189.713653] trial_completion_register_chrdev: no version for "struct_module" found: kernel tainted.
+            [  189.714935] trial_completion_register_chrdev: module license 'unspecified' taints kernel.
+            [  376.737915] process -919796568 (????????????????????????) going to sleep
+            [  407.761840] process -940534872 (????????????????????????) awakening the readers...
+            [  407.762481] awoken -919796568 (????????????????????????)
+
+
+        HTC Android phone
+            echo 1 > /dev/complete
+            则第一个ssh阻塞的cat退出，观察dmesg输出如下：
+            root@android:/data # dmesg                                                     
+            <7>[  857.769348] process 4095 (cat) going to sleep
+            <7>[  865.479522] process 3584 (sh) awakening the readers...
+            <7>[  865.482330] awoken 4095 (cat)
