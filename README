@@ -5,7 +5,7 @@
 (3) 在device上
 
     加载模块
-        insmod ompletion-register_chrdev.ko
+        insmod trial_completion-register_chrdev.ko
 
     运行以下命令查看complete设备所分配的主设备号, e.g. 246 or 234
         cat /proc/devices
@@ -15,11 +15,13 @@
     or
         mknod /dev/complete c 234 1
 
-(5) 开启两个ssh至device(N900), or, 开启两个adb shell至device(HTC Android phone)
+(5) For trial_completion-register_chrdev.c
 
-(6) 第一个ssh/shell中cat /dev/complete
+    开启两个ssh至device(N900), or, 开启两个adb shell至device(HTC Android phone)
 
-(7) 第二个ssh/shell中
+    第一个ssh/shell中cat /dev/complete
+    
+    第二个ssh/shell中
         N900
             dmesg
             可以看到
@@ -44,3 +46,37 @@
             <7>[  857.769348] process 4095 (cat) going to sleep
             <7>[  865.479522] process 3584 (sh) awakening the readers...
             <7>[  865.482330] awoken 4095 (cat)
+
+
+(5) For trial_completion-register_chrdev_v2.c
+        HTC Android phone
+            开启了4个adb shell，其中3个shell下
+                cat /dev/complete
+                then
+                    root@android:/data # dmesg | grep completion                                   
+                    <1>[ 1231.143707] completion: process 4174 (cat) going to sleep,waiting for writer
+                    <1>[ 1231.146301] completion: In read ,before comletion: reader count = 1 
+                    <1>[ 1233.393402] completion: process 4175 (cat) going to sleep,waiting for writer
+                    <1>[ 1233.395935] completion: In read ,before comletion: reader count = 2 
+                    <1>[ 1235.616394] completion: process 4177 (cat) going to sleep,waiting for writer
+                    <1>[ 1235.616577] completion: In read ,before comletion: reader count = 3 
+
+            第4个shell下，
+                echo 1 > /dev/complete              
+                    root@android:/data # echo 1 > /dev/complete                                    
+                    root@android:/data # dmesg | grep completion                                   
+                    <1>[ 1231.143707] completion: process 4174 (cat) going to sleep,waiting for writer
+                    <1>[ 1231.146301] completion: In read ,before comletion: reader count = 1 
+                    <1>[ 1233.393402] completion: process 4175 (cat) going to sleep,waiting for writer
+                    <1>[ 1233.395935] completion: In read ,before comletion: reader count = 2 
+                    <1>[ 1235.616394] completion: process 4177 (cat) going to sleep,waiting for writer
+                    <1>[ 1235.616577] completion: In read ,before comletion: reader count = 3 
+                    <1>[ 1243.888702] completion: process 1351 (sh) awoking the readers...
+                    <1>[ 1243.889129] completion: In write ,before do complete_all : reader count = 3 
+                    <1>[ 1243.889953] completion: awoken cat (4175) 
+                    <1>[ 1243.890380] completion: In read,after completion : reader count = 2 
+                    <1>[ 1243.891510] completion: awoken cat (4177) 
+                    <1>[ 1243.891937] completion: In read,after completion : reader count = 1 
+                    <1>[ 1243.896667] completion: In write ,after do complete_all : reader count = 1 
+                    <1>[ 1243.896728] completion: awoken cat (4174) 
+                    <1>[ 1243.896759] completion: In read,after completion : reader count = 0 
