@@ -56,11 +56,11 @@ int complete_init(void)
 {
     int result;
 
-    result=register_chrdev(complete_major,"complete",&complete_fops);
-    if(result<0)
+    result = register_chrdev(complete_major,"complete",&complete_fops);
+    if(result < 0)
         return result;
-    if(complete_major==0)
-        complete_major =result;
+    if(complete_major == 0)
+        complete_major = result;
 
     printk(KERN_DEBUG "completion: complete driver test init! complete_major=%d\n",complete_major);
     printk(KERN_DEBUG "completion: static initialization completion\n");

@@ -1,0 +1,51 @@
+Overall
+    register_chrdev把cdev也处理了
+    or
+    register_chrdev_region + cdev
+    or
+    alloc_chrdev_region + cdev
+
+
+ko file
+    Compile
+        make
+
+    On HTC phone
+        Upload it to HTC Android phone
+            adb push mydriver.ko /data
+
+        insmod mydriver.ko
+        cat /proc/devices
+            ...
+            234 MyDrv_dev
+            ...
+        then make new dev nod
+            mknod /dev/MyDrv0 c 234 0
+
+
+test code
+    Compile the test application
+        arm-none-linux-gnueabi-gcc test_mydriver.c -o test_mydriver --static
+
+    Upload it to HTC Android phone
+        adb push test_mydriver /data
+
+
+
+Test on HTC Android phone
+    ./test_mydriver
+
+dmesg
+    root@android:/data # insmod mydriver.ko                                        
+    root@android:/data # 
+    root@android:/data # ./a.out                                                   
+    root@android:/data # dmesg 
+    <1>[32397.376708] MyDrv: Insert my driver.......................
+    <4>[32402.431457] MrDrv: Open in myDev....................
+    <4>[32402.432220] MyDrv: Release in myDev.................
+    root@android:/data # rmmod mydriver.ko                                         
+    root@android:/data # dmesg
+    <1>[32397.376708] MyDrv: Insert my driver.......................
+    <4>[32402.431457] MrDrv: Open in myDev....................
+    <4>[32402.432220] MyDrv: Release in myDev.................
+    <1>[32413.642852] MyDrv: Remove my dirver..................
